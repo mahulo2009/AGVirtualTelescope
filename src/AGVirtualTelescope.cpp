@@ -78,7 +78,7 @@ double vt::ag::AGVirtualTelescope::armLengthProjected(double armAngle, double ar
     return armProjectedLength;
 }
 
-double vt::ag::AGVirtualTelescope::armAngleProjected_(double armAngle) const {
+double vt::ag::AGVirtualTelescope::armAngleProjected_(double armAngle) {
     double armProjectedAngle = atan(tan(armAngle) / cos(kinematicAGParams_.agArmTilt));
 
     return armProjectedAngle;
@@ -133,7 +133,7 @@ void vt::ag::AGVirtualTelescope::fromMechanismPositionToFocalPlaneCoordinates(do
 
 double
 vt::ag::AGVirtualTelescope::fromFocalPlaneCoordinatesComputeArmProjectedLength
-        (double x, double y, double armLength, double armTilt, double agTurntableRadius) {
+        (double x, double y, double armLength, double armTilt, double agTurntableRadius) const {
 
     //square of the major semi-axis
     double maxLen_sq = pow(armLength, 2);
@@ -167,7 +167,7 @@ vt::ag::AGVirtualTelescope::fromFocalPlaneCoordinatesComputeArmProjectedLength
 
 double
 vt::ag::AGVirtualTelescope::computeArmRotation
-        (double x, double y, double prjArmLen, double agTurntableRadius, double armRotatorTilt) {
+        (double x, double y, double prjArmLen, double agTurntableRadius, double armRotatorTilt) const {
 
 
     //TODO ADD SPECIAL CASE.
@@ -199,12 +199,15 @@ vt::ag::AGVirtualTelescope::fromFocalPlaneCoordinatesToMechanismPosition(double 
                                 kinematicAGParams_.armRotationSurfaceRadius,
                                 xs, ys);
 
-    /*
-    double armProjectedLength = fromFocalPlaneCoordinatesComputeArmProjectedLength(kinematicAGParams_.agArmLength,
-                                                                                   kinematicAGParams_.agArmTilt,
-                                                                                   xs,ys);
-    */
 
+    double armProjectedLength = fromFocalPlaneCoordinatesComputeArmProjectedLength(xs, ys,
+                                                                                   kinematicAGParams_.agArmLength,
+                                                                                   kinematicAGParams_.agArmTilt,
+                                                                                   kinematicAGParams_.agTurntableRadius);
+
+
+    armAngle = computeArmRotation(xs, ys, armProjectedLength, kinematicAGParams_.agTurntableRadius,
+                                  kinematicAGParams_.agArmTilt);
 
 
 }

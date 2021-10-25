@@ -41,6 +41,10 @@ namespace vt {
                                const KinematicAGParams &kinematicAGParams,
                                const KinematicTelescopeParams &kinematicTelescopeParams);
 
+            void fromMechanismPositionToFocalPlaneCoordinates(double turnTableAngle, double armAngle,
+                                                              double &x, double &y, double &ipd);
+
+
             void toNaturalReferenceFrame(double turnTableAngle, double armAngle,
                                          double &turnTableAngleNatural, double &armAngleNatural) const;
 
@@ -55,17 +59,13 @@ namespace vt {
                                              double &x, double &y) const;
 
 
-            void fromMechanismPositionToFocalPlaneCoordinates(double turnTableAngle, double armAngle,
-                                                              double &x, double &y, double &ipd);
-
-
             double fromFocalPlaneCoordinatesComputeArmProjectedLength(double x, double y,
                                                                       double armLength,
                                                                       double armTilt,
-                                                                      double agTurntableRadius);
+                                                                      double agTurntableRadius) const;
 
             double computeArmRotation(double x, double y,
-                                      double prjArmLen, double agTurntableRadius, double armRotatorTilt);
+                                      double prjArmLen, double agTurntableRadius, double armRotatorTilt) const;
 
             double computeTurnTableRotation();
 
@@ -73,11 +73,9 @@ namespace vt {
             void fromFocalPlaneCoordinatesToMechanismPosition(double x, double y,
                                                               double &turnTableAngle, double &armAngle) const;
 
+            double armAngleProjected_(double armAngle);
 
         private:
-
-
-            double armAngleProjected_(double armAngle) const;
 
 
             ZeroPointParams zeroPointParams_;

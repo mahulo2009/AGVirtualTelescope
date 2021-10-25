@@ -36,8 +36,6 @@ int main(int argc, char *argv[]) {
         double turnTableAngle = std::stod(argv[2]) * (M_PI / 180.0);
         double armAngle = std::stod(argv[3]) * (M_PI / 180.0);
 
-        turnTableAngle -= zpParams.asgTurntableOffset;
-        armAngle -= zpParams.asgArmOffset;
 
         double turnTableAngleNatural, armAngleNatural;
         vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
