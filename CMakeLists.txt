@@ -1,11 +1,51 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16)
+
 project(AGVirtualTelescope)
 
-set(CMAKE_CXX_STANDARD 14)
+# C++11
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(/opt/gcs/ext/gsl_1.16/include)
-link_directories(/opt/gcs/ext/gsl_1.16/lib/linux)
+include_directories(src)
+add_subdirectory(src)
 
-add_executable(AGVirtualTelescope main.cpp AGVirtualTelescope.cpp AGVirtualTelescope.h)
+option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 
-target_link_libraries(AGVirtualTelescope gsl gslcblas)
+if (ENABLE_UNIT_TESTS)
+    # The content behind is posted here
+    include(FetchContent)
+    FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.10.0
+    )
+
+    FetchContent_MakeAvailable(googletest)
+
+    add_executable(cpp_test "")
+    target_sources(cpp_test
+            PRIVATE
+            tests/test.cpp
+            )
+
+    target_link_libraries(cpp_test
+            PRIVATE
+            AGVirtualTelescope
+            gsl
+            gslcblas
+            gtest_main
+            )
+
+    enable_testing()
+    add_test(
+            NAME google_test
+            COMMAND $<TARGET_FILE:cpp_test>
+    )
+
+endif()
+
+
+
+
