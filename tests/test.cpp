@@ -6,162 +6,6 @@
 #include <math.h>
 #include "AGVirtualTelescope.h"
 
-/*
-TEST(example, sum_zero)
-{
-
-    vt::ag::ZeroPointParams zpParams;
-    zpParams.asgTurntableOffset = 1.3037603333333334;
-    zpParams.asgArmOffset = 0.26487116728265947;
-    zpParams.asgTurntableSense = 1;
-    zpParams.asgArmSense = 1;
-
-    vt::ag::KinematicAGParams agParams;
-    agParams.agArmLength = 256.69762595262483;
-    agParams.agArmTilt = 0.01413018;
-    agParams.agTurntableRadius = 256.340;
-    agParams.turntableRotationCenterX = 0.018;
-    agParams.turntableRotationCenterY = -0.029;
-
-    agParams.focalPlaneCurvatureRadius = 1792.96;
-    agParams.armRotationSurfaceRadius = 18139.9;
-
-    agParams.agOriginRotationRadius = 0.84781719;
-    agParams.agOriginRotationPhase = -0.159913123;
-
-    vt::ag::KinematicTelescopeParams telescopeParams;
-    telescopeParams.m2Distance = 18136.0;
-
-    double xs=30;
-    double ys=-83;
-
-    double x,y;
-    vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
-    vt.projectPointBetweenSurfaces(xs, ys,
-                                   agParams.armRotationSurfaceRadius,
-                                   agParams.focalPlaneCurvatureRadius,
-                                   x, y);
-
-    double xs1,ys1;
-    vt.projectPointBetweenSurfaces(x, y,
-                                   agParams.focalPlaneCurvatureRadius,
-                                   agParams.armRotationSurfaceRadius,
-                                   xs1, ys1);
-
-    EXPECT_TRUE((xs-xs1)<1e-9);
-    EXPECT_TRUE((ys-ys1)<1e-9);
-}
-
-TEST(example, arm)
-{
-
-    vt::ag::ZeroPointParams zpParams;
-    zpParams.asgTurntableOffset = 1.3037603333333334;
-    zpParams.asgArmOffset = 0.26487116728265947;
-    zpParams.asgTurntableSense = 1;
-    zpParams.asgArmSense = 1;
-
-    vt::ag::KinematicAGParams agParams;
-    agParams.agArmLength = 256.69762595262483;
-    agParams.agArmTilt = 0.01413018;
-    agParams.agTurntableRadius = 256.340;
-    agParams.turntableRotationCenterX = 0.018;
-    agParams.turntableRotationCenterY = -0.029;
-
-    agParams.focalPlaneCurvatureRadius = 1792.96;
-    agParams.armRotationSurfaceRadius = 18139.9;
-
-    agParams.agOriginRotationRadius = 0.84781719;
-    agParams.agOriginRotationPhase = -0.159913123;
-
-    vt::ag::KinematicTelescopeParams telescopeParams;
-    telescopeParams.m2Distance = 18136.0;
-
-    double turnTableAngle = 10  * (M_PI / 180.0) ;
-    double armAngle = 20  * (M_PI / 180.0);
-
-    double x,y,ipd;
-    vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
-    vt.fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle, armAngle, x, y, ipd);
-
-
-    ASSERT_DOUBLE_EQ(x,150.81368359493527);
-    ASSERT_DOUBLE_EQ(y,33.1163277107513);
-
-    double turnTableAngleExpeted,armAngleExpeted;
-    vt.fromFocalPlaneCoordinatesToMechanismPosition(x, y,
-                                                    turnTableAngleExpeted, armAngleExpeted);
-
-    //ASSERT_DOUBLE_EQ(turnTableAngleExpeted,1);
-    ASSERT_DOUBLE_EQ(armAngleExpeted,armAngle);
-
-
-
-    double x = 111.71602351014417;
-    double y = 9.4226915159555951;
-
-
-    double x,y,ipd;
-    vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
-    vt.fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle, armAngle, x, y, ipd);
-
-
-    ASSERT_DOUBLE_EQ(x,111.71602351014417);
-    ASSERT_DOUBLE_EQ(y,9.4226915159555951);
-
-    double turnTableAngleExpeted,armAngleExpeted;
-    vt.fromFocalPlaneCoordinatesToMechanismPosition(double turnTableAngleExpeted,armAngleExpeted;);
-
-    //ASSERT_DOUBLE_EQ(turnTableAngleExpeted,turnTableAngle);
-    ASSERT_DOUBLE_EQ(armAngleExpeted,armAngle);
-
-
-    double turnTableAngleNatural, armAngleNatural;
-    vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
-    vt.toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
-
-    double armLengthProjected = vt.fromMechanismPositionComputerArmProjectedLength(armAngleNatural,
-                                                                                   agParams.agArmLength,
-                                                                                   agParams.agArmTilt);
-    ASSERT_DOUBLE_EQ(agParams.agArmLength,256.69762595262483);
-    ASSERT_DOUBLE_EQ(armLengthProjected,256.67671136096851);
-
-
-    //----
-
-    double x1,y1,ipd;
-    vt.fromMechanismPositionToFocalPlaneCoordinates(turnTableAngleNatural, armAngleNatural, x1, y1, ipd);
-    ASSERT_DOUBLE_EQ(x,x1);
-    ASSERT_DOUBLE_EQ(y,y1);
-
-    double xs1, ys1;
-    vt.projectPointBetweenSurfaces(x, y,
-                                   agParams.focalPlaneCurvatureRadius,
-                                   agParams.armRotationSurfaceRadius,
-                                   xs1, ys1);
-
-    ASSERT_DOUBLE_EQ(xs1,111.73550504951764);
-    ASSERT_DOUBLE_EQ(ys1,9.4243346870066631);
-
-
-
-
-    double armProjectedLength1 = vt.fromFocalPlaneCoordinatesComputeArmProjectedLength(xs1, ys1,
-                                                                                      agParams.agArmLength,
-                                                                                      agParams.agArmTilt,
-                                                                                      agParams.agTurntableRadius);
-
-
-    ASSERT_DOUBLE_EQ(armLengthProjected,armProjectedLength1);
-
-
-
-
-
-
-
-}
-*/
 class AGVirtualTelescopeTest : public ::testing::Test {
 public:
 
@@ -242,7 +86,7 @@ TEST_F(AGVirtualTelescopeTest, fromMechanismPositionToAgSurfaceCoordinates) {
     vt->fromMechanismPositionToAgSurfaceCoordinates(turnTableAngleNatural, armAngleNatural,
                                                     x, y, ipd);
 
-    ASSERT_DOUBLE_EQ(x, 150.86362447274536);
+    ASSERT_DOUBLE_EQ(x, -152.26762915843653);
     ASSERT_DOUBLE_EQ(y, 33.12729394694616);
     ASSERT_DOUBLE_EQ(ipd, 5.8478539706355201); //335.05735172623577
 }
@@ -258,22 +102,72 @@ TEST_F(AGVirtualTelescopeTest, fromMechanismPositionToFocalPlaneCoordinates) {
     vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngleNatural, armAngleNatural,
                                                      x, y, ipd);
 
-    ASSERT_DOUBLE_EQ(x, 150.81368359493527);
-    ASSERT_DOUBLE_EQ(y, 33.116327710751285);
+    ASSERT_DOUBLE_EQ(x, -152.21632305456839);
+    ASSERT_DOUBLE_EQ(y, 33.116131808325456);
     ASSERT_DOUBLE_EQ(ipd, 5.8478539706355201); //335.05735172623577
 }
 
 
 TEST_F(AGVirtualTelescopeTest, fromFocalPlaneCoordinatesToMechanismPosition) {
 
-    double x = 150.81368359493527;
-    double y = 33.116327710751285;
-    double turnTableAngle, armAngle;
-    vt->fromFocalPlaneCoordinatesToMechanismPosition(x, y, turnTableAngle, armAngle);
+    double x = -152.21632305456839;
+    double y = 33.116131808325456;
+    double turnTableAngle1, armAngle1,turnTableAngle2, armAngle2;
+    vt->fromFocalPlaneCoordinatesToMechanismPosition(x, y,
+                                                     turnTableAngle1, armAngle1,
+                                                     turnTableAngle2, armAngle2);
 
-    //ASSERT_DOUBLE_EQ(turnTableAngle,150.81368359493527);
-    ASSERT_DOUBLE_EQ(armAngle, 0.61393701768152531);
+    ASSERT_DOUBLE_EQ(turnTableAngle1,1.4784755795345474);
+    ASSERT_DOUBLE_EQ(armAngle1, 0.61720197338030602);
 
+    ASSERT_DOUBLE_EQ(turnTableAngle2,-1.050032702903593);
+    ASSERT_DOUBLE_EQ(armAngle2, -0.61720197338030602);
+}
+
+TEST_F(AGVirtualTelescopeTest, one_direction) {
+
+    double x = 150;
+    double y = 33;
+
+    double turnTableAngle1, armAngle1,turnTableAngle2, armAngle2;
+    vt->fromFocalPlaneCoordinatesToMechanismPosition(x, y,
+                                                     turnTableAngle1, armAngle1,
+                                                     turnTableAngle2, armAngle2);
+
+    double x1, y1, ipd;
+    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle1, armAngle1,
+                                                     x1, y1, ipd);
+
+    double x2, y2;
+    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle1, armAngle1,
+                                                     x2, y2, ipd);
+
+
+    ASSERT_NEAR(x,x1,0.5 );
+    ASSERT_NEAR(y,y1,0.8 );
+
+    ASSERT_NEAR(x,x2,0.5 );
+    ASSERT_NEAR(y,y2,0.8 );
+}
+
+TEST_F(AGVirtualTelescopeTest, other_direction) {
+
+    double turnTableAngle1 = 35 * (M_PI)/180;
+    double armAngle1 = 12 * (M_PI)/180;
+
+    double x, y,ipd;
+    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle1, armAngle1,
+                                                     x, y, ipd);
+
+
+    double turnTableAngleOut1, armAngleOut1,turnTableAngleOut2, armAngleOut2;
+    vt->fromFocalPlaneCoordinatesToMechanismPosition(x, y,
+                                                     turnTableAngleOut1, armAngleOut1,
+                                                     turnTableAngleOut2, armAngleOut2);
+
+
+    ASSERT_NEAR(turnTableAngle1,turnTableAngleOut1,0.01 );
+    ASSERT_NEAR(armAngle1,armAngleOut1,0.01 );
 }
 
 int main(int argc, char **argv) {

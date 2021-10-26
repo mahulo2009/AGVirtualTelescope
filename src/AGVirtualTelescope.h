@@ -44,12 +44,14 @@ namespace vt {
             void fromMechanismPositionToFocalPlaneCoordinates(double turnTableAngle, double armAngle,
                                                               double &x, double &y, double &ipd);
 
+            void fromFocalPlaneCoordinatesToMechanismPosition(double x, double y,
+                                                              double &turnTableAngle1, double &armAngle1,
+                                                              double &turnTableAngle2, double &armAngle2) const;
 
             void toNaturalReferenceFrame(double turnTableAngle, double armAngle,
                                          double &turnTableAngleNatural, double &armAngleNatural) const;
 
             double armLengthProjected(double armAngle, double armLength, double armTilt);
-
 
             void fromMechanismPositionToAgSurfaceCoordinates(double turnTableAngle, double armAngle,
                                                              double &x, double &y, double &ipd);
@@ -57,7 +59,6 @@ namespace vt {
             void projectPointBetweenSurfaces(double xf, double yf,
                                              double surf1Radius, double surf2Radius,
                                              double &x, double &y) const;
-
 
             double fromFocalPlaneCoordinatesComputeArmProjectedLength(double x, double y,
                                                                       double armLength,
@@ -67,11 +68,8 @@ namespace vt {
             double computeArmRotation(double x, double y,
                                       double prjArmLen, double agTurntableRadius, double armRotatorTilt) const;
 
-            double computeTurnTableRotation();
-
-
-            void fromFocalPlaneCoordinatesToMechanismPosition(double x, double y,
-                                                              double &turnTableAngle, double &armAngle) const;
+            double computeAlfa_(double x, double y,
+                                double prjArmLen) const;
 
             double armAngleProjected_(double armAngle);
 
