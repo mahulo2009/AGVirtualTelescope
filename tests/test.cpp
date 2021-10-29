@@ -39,45 +39,45 @@ public:
 };
 
 TEST_F(AGVirtualTelescopeTest, toNaturalReferenceFrame) {
-    double turnTableAngle = 0.17453292519943295;  //10 degrees
-    double armAngle = 0.3490658503988659;         //20 degrees
+    double turnTableAngle = 10 * (M_PI/180);  //10 degrees
+    double armAngle = 20 * (M_PI/180);         //20 degrees
 
     double turnTableAngleNatural, armAngleNatural;
     vt->toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
 
 
-    ASSERT_DOUBLE_EQ(turnTableAngleNatural, 1.4782932585327664); //84.69996459656939
-    ASSERT_DOUBLE_EQ(armAngleNatural, 0.61393701768152531);      //35.175999999999995
+    ASSERT_DOUBLE_EQ(turnTableAngleNatural, 84.69996459656939 * (M_PI/180) );
+    ASSERT_DOUBLE_EQ(armAngleNatural, 35.175999999999995 * (M_PI/180));
 }
 
 TEST_F(AGVirtualTelescopeTest, armAngleProjected) {
-    double turnTableAngle = 0.17453292519943295;  //10 degrees
-    double armAngle = 0.3490658503988659;         //20 degrees
+    double turnTableAngle = 150 * (M_PI)/180;
+    double armAngle = 33 * (M_PI)/180;
 
     double turnTableAngleNatural, armAngleNatural;
     vt->toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
 
     double armAngleProjected = vt->armAngleProjected_(armAngleNatural);
 
-    ASSERT_DOUBLE_EQ(armAngleProjected, 0.61398402925648032); //35.17869356483318
+    ASSERT_NEAR(armAngleProjected, 0.840879,0.001);
 
 }
 
 TEST_F(AGVirtualTelescopeTest, armLengthProjected) {
-    double turnTableAngle = 0.17453292519943295;  //10 degrees
-    double armAngle = 0.3490658503988659;         //20 degrees
+    double turnTableAngle = 150 * (M_PI)/180;
+    double armAngle = 33 * (M_PI)/180;
 
     double turnTableAngleNatural, armAngleNatural;
     vt->toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
 
     double armLengthProjected = vt->armLengthProjected(armAngleNatural, 256.69762595262483, 0.01413018);
 
-    ASSERT_DOUBLE_EQ(armLengthProjected, 256.68050615085065); //256.68050615085065
+    ASSERT_NEAR(armLengthProjected, 256.686,0.001);
 }
 
 TEST_F(AGVirtualTelescopeTest, fromMechanismPositionToAgSurfaceCoordinates) {
-    double turnTableAngle = 0.17453292519943295;  //10 degrees
-    double armAngle = 0.3490658503988659;         //20 degrees
+    double turnTableAngle = 10 * (M_PI/180); //10 degrees
+    double armAngle = 20 * (M_PI/180);         //20 degrees
 
     double turnTableAngleNatural, armAngleNatural;
     vt->toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
@@ -86,14 +86,14 @@ TEST_F(AGVirtualTelescopeTest, fromMechanismPositionToAgSurfaceCoordinates) {
     vt->fromMechanismPositionToAgSurfaceCoordinates(turnTableAngleNatural, armAngleNatural,
                                                     x, y, ipd);
 
-    ASSERT_DOUBLE_EQ(x, -152.26762915843653);
-    ASSERT_DOUBLE_EQ(y, 33.12729394694616);
-    ASSERT_DOUBLE_EQ(ipd, 5.8478539706355201); //335.05735172623577
+    ASSERT_NEAR(x, -150.86362447274536,0.0001);
+    ASSERT_NEAR(y, 33.12729394694616,0.0001);
+    ASSERT_NEAR(ipd, 5.8478539706355201,0.001);
 }
 
 TEST_F(AGVirtualTelescopeTest, fromMechanismPositionToFocalPlaneCoordinates) {
-    double turnTableAngle = 0.17453292519943295;  //10 degrees
-    double armAngle = 0.3490658503988659;         //20 degrees
+    double turnTableAngle = 150 * (M_PI)/180;
+    double armAngle = 33 * (M_PI)/180;
 
     double turnTableAngleNatural, armAngleNatural;
     vt->toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
@@ -102,72 +102,118 @@ TEST_F(AGVirtualTelescopeTest, fromMechanismPositionToFocalPlaneCoordinates) {
     vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngleNatural, armAngleNatural,
                                                      x, y, ipd);
 
-    ASSERT_DOUBLE_EQ(x, -152.21632305456839);
-    ASSERT_DOUBLE_EQ(y, 33.116131808325456);
-    ASSERT_DOUBLE_EQ(ipd, 5.8478539706355201); //335.05735172623577
+    ASSERT_NEAR(x, 194.396,0.001);
+    ASSERT_NEAR(y, 75.3485,0.001);
+    ASSERT_NEAR(ipd, 8.74511,0.001); //335.05735172623577
 }
 
 
 TEST_F(AGVirtualTelescopeTest, fromFocalPlaneCoordinatesToMechanismPosition) {
 
-    double x = -152.21632305456839;
-    double y = 33.116131808325456;
+    double x = 194.396;
+    double y = 75.3485;
+
     double turnTableAngle1, armAngle1,turnTableAngle2, armAngle2;
     vt->fromFocalPlaneCoordinatesToMechanismPosition(x, y,
                                                      turnTableAngle1, armAngle1,
                                                      turnTableAngle2, armAngle2);
 
-    ASSERT_DOUBLE_EQ(turnTableAngle1,1.4784755795345474);
-    ASSERT_DOUBLE_EQ(armAngle1, 0.61720197338030602);
+    ASSERT_DOUBLE_EQ(turnTableAngle1,224.90681732897377 * ( M_PI/180) );
+    ASSERT_DOUBLE_EQ(armAngle1, 47.98425494373352 * ( M_PI/180) );
 
-    ASSERT_DOUBLE_EQ(turnTableAngle2,-1.050032702903593);
-    ASSERT_DOUBLE_EQ(armAngle2, -0.61720197338030602);
+    ASSERT_DOUBLE_EQ(turnTableAngle2,92.72020805737101 * ( M_PI/180) );
+    ASSERT_DOUBLE_EQ(armAngle2, -47.98425494373352 * ( M_PI/180));
 }
 
 TEST_F(AGVirtualTelescopeTest, one_direction) {
 
-    double x = 150;
-    double y = 33;
+
+    double x = 194.396;
+    double y = 75.3485;
 
     double turnTableAngle1, armAngle1,turnTableAngle2, armAngle2;
     vt->fromFocalPlaneCoordinatesToMechanismPosition(x, y,
                                                      turnTableAngle1, armAngle1,
                                                      turnTableAngle2, armAngle2);
 
-    double x1, y1, ipd;
-    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle1, armAngle1,
-                                                     x1, y1, ipd);
+    ASSERT_DOUBLE_EQ(turnTableAngle1,224.90681732897377 * ( M_PI/180) );
+    ASSERT_DOUBLE_EQ(armAngle1, 47.98425494373352 * ( M_PI/180) );
 
-    double x2, y2;
-    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle1, armAngle1,
-                                                     x2, y2, ipd);
+    ASSERT_DOUBLE_EQ(turnTableAngle2,92.72020805737101 * ( M_PI/180) );
+    ASSERT_DOUBLE_EQ(armAngle2, -47.98425494373352 * ( M_PI/180));
+
+    double turnTableAngleMechanism1, armAngleMechanism1;
+    vt->toMechanismReferenceFrame(turnTableAngle1, armAngle1, turnTableAngleMechanism1, armAngleMechanism1);
+
+    ASSERT_NEAR(turnTableAngleMechanism1,150.20661557149663 * ( M_PI/180),0.001);
+    ASSERT_NEAR(armAngleMechanism1,32.80830819432461 * ( M_PI/180) ,0.001);
+
+    double turnTableAngleMechanism2, armAngleMechanism2;
+    vt->toMechanismReferenceFrame(turnTableAngle2, armAngle2, turnTableAngleMechanism2, armAngleMechanism2);
+
+    ASSERT_NEAR(turnTableAngleMechanism2,18.020152910439034 * ( M_PI/180),0.001);
+    ASSERT_NEAR(armAngleMechanism2,-63.16057550404143 * ( M_PI/180) ,0.001 );
 
 
-    ASSERT_NEAR(x,x1,0.5 );
-    ASSERT_NEAR(y,y1,0.8 );
+    double turnTableAngleNatural1, armAngleNatural1;
+    vt->toNaturalReferenceFrame(turnTableAngleMechanism1, armAngleMechanism1, turnTableAngleNatural1, armAngleNatural1);
 
-    ASSERT_NEAR(x,x2,0.5 );
-    ASSERT_NEAR(y,y2,0.8 );
+    double x1, y1, ipd1;
+    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngleNatural1, armAngleNatural1,
+                                                     x1, y1, ipd1);
+    ASSERT_NEAR(193.81503109019101,x1,0.001 );
+    ASSERT_NEAR(74.687409983179677,y1,0.001 );
+
+    double turnTableAngleNatural2, armAngleNatural2;
+    vt->toNaturalReferenceFrame(turnTableAngleMechanism2, armAngleMechanism2, turnTableAngleNatural2, armAngleNatural2);
+
+    double x2, y2, ipd2;
+    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngleNatural2, armAngleNatural2,
+                                                     x2, y2, ipd2);
+
+    ASSERT_NEAR(193.55149531382219,x2,0.001 );
+    ASSERT_NEAR(75.137712457803943,y2,0.001 );
+
 }
 
 TEST_F(AGVirtualTelescopeTest, other_direction) {
 
-    double turnTableAngle1 = 35 * (M_PI)/180;
-    double armAngle1 = 12 * (M_PI)/180;
+    double turnTableAngle1 = 150 * (M_PI)/180;
+    double armAngle1 = 33 * (M_PI)/180;
+
+    double turnTableAngleNatural, armAngleNatural;
+    vt->toNaturalReferenceFrame(turnTableAngle1, armAngle1, turnTableAngleNatural, armAngleNatural);
 
     double x, y,ipd;
-    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngle1, armAngle1,
+    vt->fromMechanismPositionToFocalPlaneCoordinates(turnTableAngleNatural, armAngleNatural,
                                                      x, y, ipd);
 
+    ASSERT_NEAR(x,194.396,0.001 );
+    ASSERT_NEAR(y,75.3485,0.001 );
 
     double turnTableAngleOut1, armAngleOut1,turnTableAngleOut2, armAngleOut2;
     vt->fromFocalPlaneCoordinatesToMechanismPosition(x, y,
                                                      turnTableAngleOut1, armAngleOut1,
                                                      turnTableAngleOut2, armAngleOut2);
 
+    ASSERT_NEAR(turnTableAngleOut1,224.90681732897377 * ( M_PI/180) ,0.001);
+    ASSERT_NEAR(armAngleOut1, 47.98425494373352 * ( M_PI/180),0.001 );
 
-    ASSERT_NEAR(turnTableAngle1,turnTableAngleOut1,0.01 );
-    ASSERT_NEAR(armAngle1,armAngleOut1,0.01 );
+    ASSERT_NEAR(turnTableAngleOut2,92.72020805737101 * ( M_PI/180) ,0.001);
+    ASSERT_NEAR(armAngleOut2, -47.98425494373352 * ( M_PI/180),0.001);
+
+    double turnTableAngleMechanism, armAngleMechanism;
+    vt->toMechanismReferenceFrame(turnTableAngleOut1, armAngleOut1, turnTableAngleMechanism, armAngleMechanism);
+
+    ASSERT_NEAR(turnTableAngleMechanism,150.20661557149663 * ( M_PI/180),0.001);
+    ASSERT_NEAR(armAngleMechanism,32.80830819432461 * ( M_PI/180) ,0.001 );
+
+
+    vt->toMechanismReferenceFrame(turnTableAngleOut2, armAngleOut2, turnTableAngleMechanism, armAngleMechanism);
+
+    ASSERT_NEAR(turnTableAngleMechanism,18.020152910439034 * ( M_PI/180),0.001);
+    ASSERT_NEAR(armAngleMechanism,-63.16034893797588 * ( M_PI/180) ,0.001 );
+
 }
 
 int main(int argc, char **argv) {

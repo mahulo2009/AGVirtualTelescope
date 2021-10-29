@@ -21,6 +21,15 @@ void vt::ag::AGVirtualTelescope::toNaturalReferenceFrame(double turnTableAngle, 
 
 }
 
+void vt::ag::AGVirtualTelescope::toMechanismReferenceFrame(double turnTableAngle, double armAngle,
+                                                           double &turnTableAngleMechanism,
+                                                           double &armAngleMechanism) const {
+
+    turnTableAngleMechanism = (turnTableAngle - zeroPointParams_.asgTurntableOffset) * zeroPointParams_.asgTurntableSense;
+    armAngleMechanism = (armAngle - zeroPointParams_.asgArmOffset) * zeroPointParams_.asgArmSense;
+}
+
+
 void
 vt::ag::AGVirtualTelescope::fromMechanismPositionToAgSurfaceCoordinates(double turnTableAngle, double armAngle,
                                                                         double &x, double &y, double &ipd) {
@@ -29,6 +38,8 @@ vt::ag::AGVirtualTelescope::fromMechanismPositionToAgSurfaceCoordinates(double t
     double armProjectedLength = armLengthProjected(armAngle, kinematicAGParams_.agArmLength,
                                                    kinematicAGParams_.agArmTilt);
     double armAngleProjected = armAngleProjected_(armAngle);
+
+
 
     //angle of the instrument frame in relation to the telescope focal plane frame
     ipd = turnTableAngle + armAngleProjected + M_PI;
@@ -55,11 +66,13 @@ vt::ag::AGVirtualTelescope::fromMechanismPositionToAgSurfaceCoordinates(double t
             kinematicAGParams_.agOriginRotationRadius *
             sin(turnTableAngle + 2 * armAngleProjected + kinematicAGParams_.agOriginRotationPhase);
 
+    x += offset_center_x;
+    y += offset_center_y;
+
+
     //todo check this
     x = -x;
 
-    x += offset_center_x;
-    y += offset_center_y;
 
 }
 
@@ -245,4 +258,5 @@ double vt::ag::AGVirtualTelescope::computeAlfa_(double x, double y, double prjAr
 
     return alfa;
 }
+
 

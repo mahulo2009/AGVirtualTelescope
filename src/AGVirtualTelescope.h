@@ -51,6 +51,10 @@ namespace vt {
             void toNaturalReferenceFrame(double turnTableAngle, double armAngle,
                                          double &turnTableAngleNatural, double &armAngleNatural) const;
 
+            void toMechanismReferenceFrame(double turnTableAngle, double armAngle,
+                                         double &turnTableAngleMechanism, double &armAngleMechanism) const;
+
+
             double armLengthProjected(double armAngle, double armLength, double armTilt);
 
             void fromMechanismPositionToAgSurfaceCoordinates(double turnTableAngle, double armAngle,
