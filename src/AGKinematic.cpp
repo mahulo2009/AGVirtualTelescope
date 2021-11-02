@@ -1,45 +1,76 @@
 //
 // Created by mhuertas on 21/10/21.
 //
-#include "AGVirtualTelescope.h"
+#include "AGKinematic.h"
 
 #include <valarray>
 #include <gsl/gsl_poly.h>
 
-vt::ag::AGVirtualTelescope::AGVirtualTelescope(const ZeroPointParams &zeroPointParams,
+vt::ag::AGKinematic::AGKinematic(const ZeroPointParams &zeroPointParams,
                                                const KinematicAGParams &kinematicAGParams,
                                                const KinematicTelescopeParams &kinematicTelescopeParams) :
         zeroPointParams_(zeroPointParams),
         kinematicAGParams_(kinematicAGParams),
         kinematicTelescopeParams_(kinematicTelescopeParams) {}
 
-void vt::ag::AGVirtualTelescope::toNaturalReferenceFrame(double turnTableAngle, double armAngle,
-                                                         double &turnTableAngleNatural, double &armAngleNatural) const {
+void vt::ag::AGKinematic::fromMechanismToFocalPlaneCoordinates(double turnTableAngle, double armAngle,
+                                                               double &x, double &y, double &ipd) const {
+    double xs, ys;
+    fromMechanismToAgSurfaceCoordinates(turnTableAngle, armAngle, xs, ys, ipd);
 
-    turnTableAngleNatural = (turnTableAngle + zeroPointParams_.asgTurntableOffset) * zeroPointParams_.asgTurntableSense;
-    armAngleNatural = (armAngle + zeroPointParams_.asgArmOffset) * zeroPointParams_.asgArmSense;
+    projectPointBetweenSurfaces(xs, ys,
+                                kinematicAGParams_.armRotationSurfaceRadius,
+                                kinematicAGParams_.focalPlaneCurvatureRadius,
+                                x, y);
+}
+
+void vt::ag::AGKinematic::fromFocalPlaneToMechanismCoordinates(double x, double y,
+                                                          double &turnTableAngle1, double &armAngle1,
+                                                          double &turnTableAngle2, double &armAngle2) const {
+    //todo check this.
+    x=-x;
+
+    double xs, ys;
+    projectPointBetweenSurfaces(x, y,
+                                kinematicAGParams_.focalPlaneCurvatureRadius,
+                                kinematicAGParams_.armRotationSurfaceRadius,
+                                xs, ys);
+
+    double armProjectedLength = projectArmLengthFromFocalPlaneCoordinates(xs, ys);
+
+    double armAngle = computeArmRotation(xs, ys, armProjectedLength);
+    double turnTableAngle = computeAlfa(xs, ys, armProjectedLength);
+
+    //todo take in consideration special cases.
+    //first solution
+    turnTableAngle1 =  atan2 (y, x) + turnTableAngle;
+    armAngle1 = armAngle;
+    //second solution
+    turnTableAngle2 = atan2 (y, x) - turnTableAngle;
+    armAngle2 = -armAngle;
 
 }
 
-void vt::ag::AGVirtualTelescope::toMechanismReferenceFrame(double turnTableAngle, double armAngle,
-                                                           double &turnTableAngleMechanism,
-                                                           double &armAngleMechanism) const {
+void vt::ag::AGKinematic::fromMechanismToNaturalReferenceFrame(double turnTableAngle, double armAngle,
+                                                               double &turnTableAngleNatural, double &armAngleNatural) const {
+        turnTableAngleNatural = (turnTableAngle + zeroPointParams_.asgTurntableOffset) * zeroPointParams_.asgTurntableSense;
+    armAngleNatural = (armAngle + zeroPointParams_.asgArmOffset) * zeroPointParams_.asgArmSense;
+}
 
+void vt::ag::AGKinematic::fromNaturalToMechanismReferenceFrame(double turnTableAngle, double armAngle,
+                                                               double &turnTableAngleMechanism,
+                                                               double &armAngleMechanism) const {
     turnTableAngleMechanism = (turnTableAngle - zeroPointParams_.asgTurntableOffset) * zeroPointParams_.asgTurntableSense;
     armAngleMechanism = (armAngle - zeroPointParams_.asgArmOffset) * zeroPointParams_.asgArmSense;
 }
 
-
-void
-vt::ag::AGVirtualTelescope::fromMechanismPositionToAgSurfaceCoordinates(double turnTableAngle, double armAngle,
-                                                                        double &x, double &y, double &ipd) {
+void vt::ag::AGKinematic::fromMechanismToAgSurfaceCoordinates(double turnTableAngle, double armAngle,
+                                                              double &x, double &y, double &ipd) const {
 
     //compute the arm projected length
-    double armProjectedLength = armLengthProjected(armAngle, kinematicAGParams_.agArmLength,
-                                                   kinematicAGParams_.agArmTilt);
-    double armAngleProjected = armAngleProjected_(armAngle);
+    double armProjectedLength = projectArmLength(armAngle);
 
-
+    double armAngleProjected = projectArmAngle(armAngle);
 
     //angle of the instrument frame in relation to the telescope focal plane frame
     ipd = turnTableAngle + armAngleProjected + M_PI;
@@ -69,23 +100,19 @@ vt::ag::AGVirtualTelescope::fromMechanismPositionToAgSurfaceCoordinates(double t
     x += offset_center_x;
     y += offset_center_y;
 
-
     //todo check this
     x = -x;
-
-
 }
 
-
-double vt::ag::AGVirtualTelescope::armLengthProjected(double armAngle, double armLength, double armTilt) {
+double vt::ag::AGKinematic::projectArmLength(double armAngle) const {
 
     //square of the major semi-axis
-    double maxLen_sq = pow(armLength, 2);
+    double maxLen_sq = pow(kinematicAGParams_.agArmLength, 2);
     //square of the minor semi-axis
-    double minLen_sq = pow(armLength * cos(armTilt), 2);
+    double minLen_sq = pow(kinematicAGParams_.agArmLength * cos(kinematicAGParams_.agArmTilt), 2);
 
     //arm projected angle
-    double armProjectedAngle = armAngleProjected_(armAngle);
+    double armProjectedAngle = projectArmAngle(armAngle);
 
     //compute the arm projected length
     double armProjectedLength = sqrt(maxLen_sq * pow(sin(armProjectedAngle), 2) +
@@ -94,14 +121,14 @@ double vt::ag::AGVirtualTelescope::armLengthProjected(double armAngle, double ar
     return armProjectedLength;
 }
 
-double vt::ag::AGVirtualTelescope::armAngleProjected_(double armAngle) {
+double vt::ag::AGKinematic::projectArmAngle(double armAngle) const {
     double armProjectedAngle = atan(tan(armAngle) / cos(kinematicAGParams_.agArmTilt));
 
     return armProjectedAngle;
 }
 
 void
-vt::ag::AGVirtualTelescope::projectPointBetweenSurfaces(double xf, double yf,
+vt::ag::AGKinematic::projectPointBetweenSurfaces(double xf, double yf,
                                                         double surf1Radius, double surf2Radius,
                                                         double &x, double &y) const {
     //convenience variables
@@ -134,29 +161,15 @@ vt::ag::AGVirtualTelescope::projectPointBetweenSurfaces(double xf, double yf,
 
 }
 
-void vt::ag::AGVirtualTelescope::fromMechanismPositionToFocalPlaneCoordinates(double turnTableAngle, double armAngle,
-                                                                              double &x, double &y, double &ipd) {
-
-    double xs, ys;
-    fromMechanismPositionToAgSurfaceCoordinates(turnTableAngle, armAngle, xs, ys, ipd);
-
-    projectPointBetweenSurfaces(xs, ys,
-                                kinematicAGParams_.armRotationSurfaceRadius,
-                                kinematicAGParams_.focalPlaneCurvatureRadius,
-                                x, y);
-
-}
-
 double
-vt::ag::AGVirtualTelescope::fromFocalPlaneCoordinatesComputeArmProjectedLength
-        (double x, double y, double armLength, double armTilt, double agTurntableRadius) const {
+vt::ag::AGKinematic::projectArmLengthFromFocalPlaneCoordinates(double x, double y) const {
 
     //square of the major semi-axis
-    double maxLen_sq = pow(armLength, 2);
+    double maxLen_sq = pow(kinematicAGParams_.agArmLength, 2);
     //square of the minor semi-axis
-    double minLen_sq = pow(armLength * cos(armTilt), 2);
+    double minLen_sq = pow(kinematicAGParams_.agArmLength * cos(kinematicAGParams_.agArmTilt), 2);
     //square of the turntable radius
-    double rt_sq = pow(agTurntableRadius, 2);
+    double rt_sq = pow(kinematicAGParams_.agTurntableRadius, 2);
     //square of the radial component of the point (x,y) coordinate
     double rxy_sq = pow(x, 2) + pow(y, 2);
 
@@ -182,9 +195,8 @@ vt::ag::AGVirtualTelescope::fromFocalPlaneCoordinatesComputeArmProjectedLength
 }
 
 double
-vt::ag::AGVirtualTelescope::computeArmRotation
-        (double x, double y, double prjArmLen, double agTurntableRadius, double armRotatorTilt) const {
-
+vt::ag::AGKinematic::computeArmRotation
+        (double x, double y, double prjArmLen) const {
 
     //todo add special cases
     double polarRadius = sqrt(pow(x, 2) + pow(y, 2));
@@ -192,56 +204,20 @@ vt::ag::AGVirtualTelescope::computeArmRotation
         return 0.0;
     }
 
-    double rt_sq = pow(agTurntableRadius, 2);
+    double rt_sq = pow(kinematicAGParams_.agTurntableRadius, 2);
     double prjArmLen_sq = prjArmLen * prjArmLen;
     double polarRadius_sq = polarRadius * polarRadius;
 
-    double cosRotAngle = (rt_sq + prjArmLen_sq - polarRadius_sq) / (2 * prjArmLen * agTurntableRadius);
+    double cosRotAngle = (rt_sq + prjArmLen_sq - polarRadius_sq) / (2 * prjArmLen * kinematicAGParams_.agTurntableRadius);
 
     double armProjectedAngle = acos(cosRotAngle);
 
-    double armRotationAngle = atan(tan(armProjectedAngle) * cos(armRotatorTilt));
+    double armRotationAngle = atan(tan(armProjectedAngle) * cos(kinematicAGParams_.agArmTilt));
 
     return armRotationAngle;
 }
 
-void
-vt::ag::AGVirtualTelescope::fromFocalPlaneCoordinatesToMechanismPosition(double x, double y,
-                                                                         double &turnTableAngle1, double &armAngle1,
-                                                                         double &turnTableAngle2, double &armAngle2) const {
-
-    //todo check this.
-    x=-x;
-
-    double xs, ys;
-    projectPointBetweenSurfaces(x, y,
-                                kinematicAGParams_.focalPlaneCurvatureRadius,
-                                kinematicAGParams_.armRotationSurfaceRadius,
-                                xs, ys);
-
-
-    double armProjectedLength = fromFocalPlaneCoordinatesComputeArmProjectedLength(xs, ys,
-                                                                                   kinematicAGParams_.agArmLength,
-                                                                                   kinematicAGParams_.agArmTilt,
-                                                                                   kinematicAGParams_.agTurntableRadius);
-
-
-    double armAngle = computeArmRotation(xs, ys, armProjectedLength, kinematicAGParams_.agTurntableRadius,
-                                  kinematicAGParams_.agArmTilt);
-
-    double turnTableAngle = computeAlfa_(xs,ys,armProjectedLength);
-
-    //todo take in consideration special cases.
-    //first solution
-    turnTableAngle1 =  atan2 (y, x) + turnTableAngle;
-    armAngle1 = armAngle;
-
-    //second solution
-    turnTableAngle2 = atan2 (y, x) - turnTableAngle;
-    armAngle2 = -armAngle;
-}
-
-double vt::ag::AGVirtualTelescope::computeAlfa_(double x, double y, double prjArmLen) const {
+double vt::ag::AGKinematic::computeAlfa(double x, double y, double prjArmLen) const {
 
     //todo add special cases
     double polarRadius =  sqrt (pow(x,2) + pow(y,2));
@@ -252,8 +228,6 @@ double vt::ag::AGVirtualTelescope::computeAlfa_(double x, double y, double prjAr
     double polarRadius_sq = polarRadius*polarRadius;
 
     double cosAlfa = (rt_sq + polarRadius_sq - prjArmLen_sq )/(2*polarRadius*kinematicAGParams_.agTurntableRadius);
-
-
     double alfa = acos(cosAlfa);
 
     return alfa;

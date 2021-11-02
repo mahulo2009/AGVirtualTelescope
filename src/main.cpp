@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "AGVirtualTelescope.h"
+#include "AGKinematic.h"
 
 
 int main(int argc, char *argv[]) {
@@ -38,23 +38,23 @@ int main(int argc, char *argv[]) {
 
 
         double turnTableAngleNatural, armAngleNatural;
-        vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
-        vt.toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
+        vt::ag::AGKinematic vt(zpParams, agParams, telescopeParams);
+        vt.fromMechanismToNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
 
         std::cout << "turnTableAngleNatural: " << turnTableAngleNatural << std::endl;
         std::cout << "armAngleNatural: " << armAngleNatural << std::endl;
         std::cout << std::endl;
 
 
-        double armLengthProjected = vt.armLengthProjected(armAngleNatural, agParams.agArmLength, agParams.agArmTilt);
+        double armLengthProjected = vt.projectArmLength(armAngleNatural, agParams.agArmLength, agParams.agArmTilt);
         std::cout << "agArmLength: " << agParams.agArmLength
                   << " agArmTilt: " << agParams.agArmTilt
-                  << " armLengthProjected: " << armLengthProjected << std::endl;
+                  << " projectArmLength: " << armLengthProjected << std::endl;
         std::cout << std::endl;
 
 
         double xs, ys, ipd;
-        vt.fromMechanismPositionToAgSurfaceCoordinates(turnTableAngleNatural, armAngleNatural, xs, ys, ipd);
+        vt.fromMechanismToAgSurfaceCoordinates(turnTableAngleNatural, armAngleNatural, xs, ys, ipd);
 
         std::cout << "xs: " << xs << std::endl;
         std::cout << "ys: " << ys << std::endl;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
         std::cout << "ipd: " << ipd << std::endl;
         std::cout << std::endl;
 
-        vt.fromMechanismPositionToFocalPlaneCoordinates(turnTableAngleNatural, armAngleNatural, x, y, ipd);
+        vt.fromMechanismToFocalPlaneCoordinates(turnTableAngleNatural, armAngleNatural, x, y, ipd);
         std::cout << "x: " << x << std::endl;
         std::cout << "y: " << y << std::endl;
         std::cout << "ipd: " << ipd << std::endl;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
         double x = std::stod(argv[2]);
         double y = std::stod(argv[3]);
 
-        vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
+        vt::ag::AGKinematic vt(zpParams, agParams, telescopeParams);
         double xs, ys;
         vt.projectPointBetweenSurfaces(x, y,
                                        agParams.focalPlaneCurvatureRadius,
@@ -98,15 +98,11 @@ int main(int argc, char *argv[]) {
         std::cout << "ys: " << ys << std::endl;
         std::cout << std::endl;
 
-        double armProjectedLength = vt.fromFocalPlaneCoordinatesComputeArmProjectedLength(xs, ys,
-                                                                                          agParams.agArmLength,
-                                                                                          agParams.agArmTilt,
-                                                                                          agParams.agTurntableRadius);
+        double armProjectedLength = vt.projectArmLengthFromFocalPlaneCoordinates(xs, ys);
         std::cout << "armProjectedLength: " << armProjectedLength << std::endl;
         std::cout << std::endl;
 
-        double armRotation = vt.computeArmRotation(xs, ys, armProjectedLength, agParams.agTurntableRadius,
-                                                   agParams.agArmTilt);
+        double armRotation = vt.computeArmRotation(xs, ys, armProjectedLength);
 
         std::cout << "armRotation: " << armRotation * (180 / M_PI) << std::endl;
         std::cout << std::endl;
