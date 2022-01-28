@@ -22,7 +22,6 @@ namespace vt {
             double turntableRotationCenterX;
             double turntableRotationCenterY;
 
-            double focalPlaneCurvatureRadius;
             double armRotationSurfaceRadius;
 
             double agOriginRotationRadius;
@@ -31,6 +30,7 @@ namespace vt {
 
         struct KinematicTelescopeParams {
             double m2Distance;
+            double focalPlaneCurvatureRadius;
         };
 
         class AGVirtualTelescope {
@@ -39,43 +39,59 @@ namespace vt {
 
             AGVirtualTelescope(const ZeroPointParams &zeroPointParams,
                                const KinematicAGParams &kinematicAGParams,
-                               const KinematicTelescopeParams &kinematicTelescopeParams);
-
-            void fromMechanismPositionToFocalPlaneCoordinates(double turnTableAngle, double armAngle,
-                                                              double &x, double &y, double &ipd);
-
-            void fromFocalPlaneCoordinatesToMechanismPosition(double x, double y,
-                                                              double &turnTableAngle1, double &armAngle1,
-                                                              double &turnTableAngle2, double &armAngle2) const;
-
-            void toNaturalReferenceFrame(double turnTableAngle, double armAngle,
-                                         double &turnTableAngleNatural, double &armAngleNatural) const;
-
-            void toMechanismReferenceFrame(double turnTableAngle, double armAngle,
-                                         double &turnTableAngleMechanism, double &armAngleMechanism) const;
-
-
-            double armLengthProjected(double armAngle, double armLength, double armTilt);
-
-            void fromMechanismPositionToAgSurfaceCoordinates(double turnTableAngle, double armAngle,
-                                                             double &x, double &y, double &ipd);
+                               const KinematicTelescopeParams &kinematicTelescopeParams,
+                               bool flipFocalPlane);
 
             void projectPointBetweenSurfaces(double xf, double yf,
                                              double surf1Radius, double surf2Radius,
                                              double &x, double &y) const;
 
-            double fromFocalPlaneCoordinatesComputeArmProjectedLength(double x, double y,
-                                                                      double armLength,
-                                                                      double armTilt,
-                                                                      double agTurntableRadius) const;
 
-            double computeArmRotation(double x, double y,
-                                      double prjArmLen, double agTurntableRadius, double armRotatorTilt) const;
+
+
+            //-------------------------Inverse Kinematic
+            void projectFromFocalPlaneSurfaceToArmRotation(double xs, double ys, double &x, double &y);
+
+            void misalignmentCorrectionTurnTabelAndCenterRotation(double x, double y, double &xa, double &ya);
+
+            double fromFocalPlaneCoordinatesComputeArmProjectedLength(double x, double y) const;
+
+            double computeArmRotation(double x, double y,double prjArmLen) const;
 
             double computeAlfa_(double x, double y,
                                 double prjArmLen) const;
 
-            double armAngleProjected_(double armAngle);
+            void toMechanismReferenceFrame(double turnTableAngle, double armAngle,
+                                           double &turnTableAngleMechanism, double &armAngleMechanism) const;
+
+            void fromFocalPlaneToMechanism(double x, double y,
+                                           double &turnTableAngle1, double &armAngle1,
+                                           double &turnTableAngle2, double &armAngle2);
+
+
+
+
+            //-------------------------Direct Kinematic
+
+            void fromMechanismToFocalPlane(double turnTableAngle, double armAngle,
+                                                              double &x, double &y, double &ipd);
+
+            void toNaturalReferenceFrame(double turnTableAngle, double armAngle,
+                                         double &turnTableAngleNatural, double &armAngleNatural) const;
+
+
+            void projectFromArmRotationToFocalPlaneSurface(double xs, double ys, double &x, double &y);
+
+            double armAngleProjected(double armAngle);
+
+            double armLengthProjected(double armAngle);
+
+            void misalignmentCorrectionCenterRotationAndTurnTabel(double x, double y, double &xa, double &ya);
+
+            void fromMechanismToAGFocalPlaneFrame(double turnTableAngle, double armAngle,
+                                                  double armLengthProjected,
+                                                  double &x, double &y, double &ipd);
+
 
         private:
 
@@ -83,6 +99,7 @@ namespace vt {
             ZeroPointParams zeroPointParams_;
             KinematicAGParams kinematicAGParams_;
             KinematicTelescopeParams kinematicTelescopeParams_;
+            bool flipFocalPlane_;
         };
     }
 }
