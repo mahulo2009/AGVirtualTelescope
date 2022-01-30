@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include <math.h>
-#include "AGVirtualTelescope.h"
+#include "AGKinematic.h"
 
 class AGVirtualTelescopeTest : public ::testing::Test {
 public:
@@ -28,13 +28,13 @@ public:
         agParamsCassegrain.agOriginRotationRadius = 0.0;
         agParamsCassegrain.agOriginRotationPhase = 0.0;
 
-        vt = new vt::ag::AGVirtualTelescope(zpParamsCassegrain,
-                                            agParamsCassegrain,
-                                            telescopeParams,
-                                            false);
+        vt = new vt::ag::AGKinematic(zpParamsCassegrain,
+                                     agParamsCassegrain,
+                                     telescopeParams,
+                                     false);
     }
 
-    vt::ag::AGVirtualTelescope *vt;
+    vt::ag::AGKinematic *vt;
 
     vt::ag::KinematicTelescopeParams telescopeParams;
     vt::ag::ZeroPointParams zpParamsCassegrain;
@@ -89,9 +89,9 @@ TEST_F(AGVirtualTelescopeTest, kinematicDirect) {
 TEST_F(AGVirtualTelescopeTest, fromMechanismToFocalPlane) {
 
     double x,y,ipd;
-    vt->fromMechanismToFocalPlane(turnTableAngle120,
-                                  armAngleMinus16,
-                                  x,y,ipd);
+    vt->direct(turnTableAngle120,
+               armAngleMinus16,
+               x, y, ipd);
 
     ASSERT_NEAR(x,149.96981748443,1e-7);
     ASSERT_NEAR(y,-61.9929081282726,1e-7);
@@ -148,9 +148,9 @@ TEST_F(AGVirtualTelescopeTest, inverseDirect)
 TEST_F(AGVirtualTelescopeTest, fromFocalPlaneToMechanism) {
 
     double x,y,ipd;
-    vt->fromMechanismToFocalPlane(turnTableAngle120,
-                                  armAngleMinus16,
-                                  x,y,ipd);
+    vt->direct(turnTableAngle120,
+               armAngleMinus16,
+               x, y, ipd);
 
     ASSERT_NEAR(x,149.96981748443,1e-7);
     ASSERT_NEAR(y,-61.9929081282726,1e-7);
@@ -297,7 +297,7 @@ TEST_F(AGVirtualTelescopeTest, other_direction) {
     ASSERT_NEAR(y,140.6115130656911,0.001 );
 
     double turnTableAngleOut1, armAngleOut1,turnTableAngleOut2, armAngleOut2;
-    vt->fromFocalPlaneToMechanism(x, y,
+    vt->inverse(x, y,
                                                      turnTableAngleOut1, armAngleOut1,
                                                      turnTableAngleOut2, armAngleOut2);
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "AGVirtualTelescope.h"
+#include "AGKinematic.h"
 
 
 int main(int argc, char *argv[]) {
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 
 
         double turnTableAngleNatural, armAngleNatural;
-        vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
+        vt::ag::AGKinematic vt(zpParams, agParams, telescopeParams);
         vt.toNaturalReferenceFrame(turnTableAngle, armAngle, turnTableAngleNatural, armAngleNatural);
 
         std::cout << "turnTableAngleNatural: " << turnTableAngleNatural << std::endl;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
         double x = std::stod(argv[2]);
         double y = std::stod(argv[3]);
 
-        vt::ag::AGVirtualTelescope vt(zpParams, agParams, telescopeParams);
+        vt::ag::AGKinematic vt(zpParams, agParams, telescopeParams);
         double xs, ys;
         vt.projectPointBetweenSurfaces(x, y,
                                        agParams.focalPlaneCurvatureRadius,
