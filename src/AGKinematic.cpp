@@ -144,7 +144,8 @@ double vt::ag::AGKinematic::computeAlfa_(double x, double y, double prjArmLen) c
 void
 vt::ag::AGKinematic::inverse(double x, double y,
                              double &turnTableAngle1, double &armAngle1,
-                             double &turnTableAngle2, double &armAngle2)  {
+                             double &turnTableAngle2, double &armAngle2,
+                             double &focus)  {
 
     if(flipFocalPlane_)
         x=-x;
@@ -166,6 +167,9 @@ vt::ag::AGKinematic::inverse(double x, double y,
     //second solution
     turnTableAngle2 = atan2 (y, x) - turnTableAngle;
     armAngle2 = -armAngle;
+
+    //todo
+    focus = 0;
 }
 
 

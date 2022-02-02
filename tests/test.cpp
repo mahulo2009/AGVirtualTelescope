@@ -157,6 +157,8 @@ TEST_F(AGVirtualTelescopeTest, fromFocalPlaneToMechanism) {
     //ASSERT_DOUBLE_EQ(ipd,4.7126813674734631);
 }
 
+//todo inverse kinematic
+
 
 /*
 

@@ -46,7 +46,8 @@ namespace vt {
 
             void inverse(double x, double y,
                          double &turnTableAngle1, double &armAngle1,
-                         double &turnTableAngle2, double &armAngle2);
+                         double &turnTableAngle2, double &armAngle2,
+                         double &focus);
 
             //-------------------------Direct Kinematic
 
