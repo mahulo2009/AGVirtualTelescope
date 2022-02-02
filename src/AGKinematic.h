@@ -88,11 +88,11 @@ namespace vt {
 
         private:
 
-
             ZeroPointParams zeroPointParams_;
             KinematicAGParams kinematicAGParams_;
             KinematicTelescopeParams kinematicTelescopeParams_;
             bool flipFocalPlane_;
+
         };
     }
 }

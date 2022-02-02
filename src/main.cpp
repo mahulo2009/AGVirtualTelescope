@@ -4,8 +4,9 @@
 #include "AGKinematic.h"
 
 
-int main(int argc, char *argv[]) {
 
+int main(int argc, char *argv[]) {
+/*
     vt::ag::ZeroPointParams zpParams;
     zpParams.asgTurntableOffset = 1.3037603333333334;
     zpParams.asgArmOffset = 0.26487116728265947;
@@ -113,5 +114,5 @@ int main(int argc, char *argv[]) {
 
         return 0;
     }
-
+*/
 }

@@ -153,23 +153,31 @@ vt::ag::AGKinematic::inverse(double x, double y,
     double xs, ys;
     projectFromFocalPlaneSurfaceToArmRotation(x, y, xs, ys);
 
-    double armProjectedLength = fromFocalPlaneCoordinatesComputeArmProjectedLength(xs, ys);
+    double xa,ya;
+    misalignmentCorrectionTurnTabelAndCenterRotation(xs,ys,xa,ya);
 
-    double armAngle = computeArmRotation(xs, ys,armProjectedLength);
+    double armProjectedLength = fromFocalPlaneCoordinatesComputeArmProjectedLength(xa, ya);
 
-    double turnTableAngle = computeAlfa_(xs,ys,armProjectedLength);
+    double armAngle = computeArmRotation(xa, ya,armProjectedLength);
+
+    double turnTableAngle = computeAlfa_(xa,ya,armProjectedLength);
 
     //todo take in consideration special cases.
     //first solution
-    turnTableAngle1 =  atan2 (y, x) + turnTableAngle;
+    turnTableAngle1 =  atan2 (ya, xa) + turnTableAngle;
     armAngle1 = armAngle;
 
     //second solution
-    turnTableAngle2 = atan2 (y, x) - turnTableAngle;
+    turnTableAngle2 = atan2 (ya, xa) - turnTableAngle;
     armAngle2 = -armAngle;
 
-    //todo
-    focus = 0;
+    double focalPlaneRadius_sq = pow(kinematicTelescopeParams_.focalPlaneCurvatureRadius,2);
+    double armTiltedSurfaceRadius_sq = pow(kinematicAGParams_.armRotationSurfaceRadius,2);
+    double polarRadius_sq = pow(xa, 2) + pow(ya, 2);
+
+    focus = sqrt(armTiltedSurfaceRadius_sq - polarRadius_sq) - sqrt(focalPlaneRadius_sq - polarRadius_sq)
+            + kinematicTelescopeParams_.focalPlaneCurvatureRadius - kinematicAGParams_.armRotationSurfaceRadius;
+
 }
 
 
